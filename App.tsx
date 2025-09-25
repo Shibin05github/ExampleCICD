@@ -17,6 +17,7 @@ import {
 
 const WelcomeScreen = () => {
   console.log('test');
+  console.log('test');
 
   return (
     <View style={styles.view}>
