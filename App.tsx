@@ -16,6 +16,8 @@ import {
 } from 'react-native';
 
 const WelcomeScreen = () => {
+  console.log('test');
+
   return (
     <View style={styles.view}>
       <Text style={styles.welcomeText}>
