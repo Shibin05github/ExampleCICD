@@ -36,6 +36,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -43,6 +46,11 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
+
+      - name: Create debug keystore
+        run: |
+          mkdir -p android/app
+          keytool -genkey -v -keystore android/app/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
       - name: Build Android App Bundle
         run: |
@@ -54,7 +62,11 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew clean
-          ./gradlew bundleRelease -Pkeystore.password=${{ secrets.KEYSTORE_PASSWORD }}
+          ./gradlew bundleRelease
+
+      - name: List build outputs
+        run: |
+          find android/app/build/outputs -name "*.aab" -o -name "*.apk" | head -10
 
   download_bundle:
     runs-on: ubuntu-latest
@@ -66,7 +78,16 @@ jobs:
       - name: Download Android App Bundle
         run: |
           mkdir -p $GITHUB_WORKSPACE/dist
-          cp $GITHUB_WORKSPACE/android/app/build/outputs/bundle/release/app-release.aab $GITHUB_WORKSPACE/dist
+          # Find the AAB file and copy it
+          AAB_FILE=$(find $GITHUB_WORKSPACE/android/app/build/outputs -name "*.aab" | head -1)
+          if [ -n "$AAB_FILE" ]; then
+            cp "$AAB_FILE" $GITHUB_WORKSPACE/dist/app-release.aab
+            echo "Found AAB: $AAB_FILE"
+          else
+            echo "No AAB file found in build outputs"
+            find $GITHUB_WORKSPACE/android/app/build/outputs -type f | head -10
+            exit 1
+          fi
 
       - name: Archive Bundle
         uses: actions/upload-artifact@v4
