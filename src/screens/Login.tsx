@@ -1,29 +1,14 @@
 import React, { useState } from 'react'
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native'
-import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { loginSchema } from '../validation/Validation'
 import { useAuth } from '../context/AuthContext'
 
 export default function LoginScreen() {
   const { login } = useAuth()
   const [generalError, setGeneralError] = useState<string | null>(null)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors }
-  } = useForm({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: ''
-    }
-  })
-
-  const handleValidSubmit = (data: { email: string; password: string }) => {
-    const { email, password } = data
-
+  const handleLoginPress = () => {
     if (!email || !password) {
       setGeneralError('Please provide all values')
       return
@@ -38,52 +23,30 @@ export default function LoginScreen() {
     setGeneralError('INCORRECT CREDENTIAL')
   }
 
-  const handleInvalidSubmit = () => {
-    setGeneralError('Please provide all values')
-  }
-
   return (
     <View style={styles.container}>
       <Text>Email</Text>
-      <Controller
-        control={control}
-        name="email"
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            style={styles.input}
-            value={value}
-            onChangeText={onChange}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            placeholder="Enter username"
-          />
-        )}
+      <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        placeholder="Enter username"
       />
-      {errors.email && (
-        <Text style={styles.error}>{errors.email.message}</Text>
-      )}
 
       <Text>Password</Text>
-      <Controller
-        control={control}
-        name="password"
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            style={styles.input}
-            value={value}
-            onChangeText={onChange}
-            secureTextEntry
-            placeholder="Enter Password"
-          />
-        )}
+      <TextInput
+        style={styles.input}
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        placeholder="Enter Password"
       />
-      {errors.password && (
-        <Text style={styles.error}>{errors.password.message}</Text>
-      )}
 
       <Button
         title="LOGIN"
-        onPress={handleSubmit(handleValidSubmit, handleInvalidSubmit)}
+        onPress={handleLoginPress}
       />
 
       {generalError && <Text style={styles.error}>{generalError}</Text>}
