@@ -4,7 +4,7 @@ import LoginScreen from "../screens/Login"
 
 const MainRoutes = () => {
     const { isLoggedIn } = useAuth()
-    return !isLoggedIn ? <ListScreen/> : <LoginScreen/>
+    return !isLoggedIn ? <LoginScreen /> : <ListScreen />
 }
 
 export default MainRoutes
