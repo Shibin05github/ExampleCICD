@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema } from '../validation/Validation'
+import { useAuth } from '../context/AuthContext'
 
 export default function LoginScreen() {
+  const { login } = useAuth()
+  const [generalError, setGeneralError] = useState<string | null>(null)
+
   const {
     control,
     handleSubmit,
@@ -17,9 +21,25 @@ export default function LoginScreen() {
     }
   })
 
-  const onSubmit = (data: any) => {
-    console.log('Login Data:', data)
-    // API call here
+  const handleValidSubmit = (data: { email: string; password: string }) => {
+    const { email, password } = data
+
+    if (!email || !password) {
+      setGeneralError('Please provide all values')
+      return
+    }
+
+    if (email === 'codeb@gmail.com' && password === 'Password@1234') {
+      setGeneralError(null)
+      login()
+      return
+    }
+
+    setGeneralError('INCORRECT CREDENTIAL')
+  }
+
+  const handleInvalidSubmit = () => {
+    setGeneralError('Please provide all values')
   }
 
   return (
@@ -35,6 +55,7 @@ export default function LoginScreen() {
             onChangeText={onChange}
             keyboardType="email-address"
             autoCapitalize="none"
+            placeholder="Enter username"
           />
         )}
       />
@@ -52,6 +73,7 @@ export default function LoginScreen() {
             value={value}
             onChangeText={onChange}
             secureTextEntry
+            placeholder="Enter Password"
           />
         )}
       />
@@ -59,7 +81,12 @@ export default function LoginScreen() {
         <Text style={styles.error}>{errors.password.message}</Text>
       )}
 
-      <Button title="Login" onPress={handleSubmit(onSubmit)} />
+      <Button
+        title="LOGIN"
+        onPress={handleSubmit(handleValidSubmit, handleInvalidSubmit)}
+      />
+
+      {generalError && <Text style={styles.error}>{generalError}</Text>}
     </View>
   )
 }

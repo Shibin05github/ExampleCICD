@@ -38,7 +38,7 @@ export const ListScreen = () => {
 
     return (
         <View style={styles.container}>
-            <Text variant="bodyLarge">List</Text>
+            <Text variant="bodyLarge">CODEB</Text>
             <FlatList
                 data={listItems?.products}
                 renderItem={RenderList}
